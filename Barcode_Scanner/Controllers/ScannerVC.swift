@@ -9,9 +9,9 @@ import Foundation
 import AVFoundation
 import UIKit
 
-enum CameraError: String {
-    case invalidDeviceInput = "Something wrong with camera. Unable to capture input."
-    case invalidScannedValue = "The value scanned is not valid. This app scans EAN-8 and EAN-13 barcodes."
+enum CameraError {
+    case invalidDeviceInput
+    case invalidScannedValue
 }
 
 protocol ScannerVCDelegate: AnyObject {
@@ -31,6 +31,22 @@ final class ScannerVC: UIViewController {
     
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
+    }
+    
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        setupCaptureSession()
+        
+    }
+    
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        guard let previewLayer = previewLayer else {
+            scannerDelegate?.didSurface(error: .invalidDeviceInput)
+            return
+        }
+        
+        previewLayer.frame = view.layer.bounds
     }
     
     private func setupCaptureSession() {
@@ -92,6 +108,7 @@ extension ScannerVC: AVCaptureMetadataOutputObjectsDelegate {
             return
         }
         
+//        captureSession.stopRunning()
         scannerDelegate?.didFind(barcode: barcode)
     }
 }
